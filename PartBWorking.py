@@ -118,6 +118,10 @@ def train_and_classify(training_data, development_data, testing_data):
                 epoch_loss += loss
                 loss.backward()
                 model.optimizer.step()
+                if index % 400 == 0 and index != 0:
+                    print('Iteration {}'.format(index))
+                    print('Training loss: {}'.format(epoch_loss / index + 1))
+                    print('Development accuracy: {}'.format(str(round(validate(dev_data, model) * 100, 2)) + '%'))
             print('Average loss for epoch {}: {}'.format(epoch + 1, epoch_loss / N))
             print('Training accuracy for epoch {}: {}'.format(epoch + 1, str(round((correct / total) * 100, 2)) + '%'))
             acc = validate(dev_data, model)
