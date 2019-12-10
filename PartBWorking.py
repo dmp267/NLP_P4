@@ -20,10 +20,11 @@ config = BertConfig.from_pretrained('./mini/config.json')
 tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
 # mini = BertModel.from_pretrained('./mini/pytorch_model.bin', config=config)
 bert = BertModel.from_pretrained('bert-base-uncased')
+# nsp = BertForNextSentencePrediction.from_pretrained('bert-base-uncased')
 
-EPOCHS = 4
+EPOCHS = 1
 LR = 0.001
-NAME = 'Bert2'
+NAME = 'Bert3'
 CURRENT = os.curdir
 MODELS = os.path.join(CURRENT, 'experimental_models')
 PATH = os.path.join(MODELS, NAME)
@@ -45,6 +46,7 @@ def train_and_classify(training_data, development_data, testing_data):
             # features = torch.mean(mini(input_vector)[0].squeeze(), dim=0)
             prediction = self.linear(features)
             return self.softmax(prediction)
+            return nsp(input_vector)[0].squeeze()
 
     def setup(training_data, development_data, testing_data):
         print('\nInitializing Setup')
@@ -118,10 +120,10 @@ def train_and_classify(training_data, development_data, testing_data):
                 epoch_loss += loss
                 loss.backward()
                 model.optimizer.step()
-                if index % 400 == 0 and index != 0:
-                    print('Iteration {}'.format(index))
-                    print('Training loss: {}'.format(epoch_loss / index + 1))
-                    print('Development accuracy: {}'.format(str(round(validate(dev_data, model) * 100, 2)) + '%'))
+                # if index % 400 == 0 and index != 0:
+                #     print('\nIteration {}'.format(index))
+                #     print('Training loss for current iteration: {}'.format(loss))
+                #     print('Development accuracy for current model: {}'.format(str(round(validate(dev_data, model) * 100, 2)) + '%\n'))
             print('Average loss for epoch {}: {}'.format(epoch + 1, epoch_loss / N))
             print('Training accuracy for epoch {}: {}'.format(epoch + 1, str(round((correct / total) * 100, 2)) + '%'))
             acc = validate(dev_data, model)
@@ -193,13 +195,14 @@ def train_and_classify(training_data, development_data, testing_data):
 
     train_data, dev_data, test_data = setup(training_data, development_data, testing_data)
 
+
     # create and train model
     epoch, acc = train(train_data, dev_data)
     path = PATH + '-epoch' + str(epoch) + '-acc' + str(acc) + '.pt'
     model = BertnaryClassification()
     model.load_state_dict(torch.load(path))
-
-    # evaulate model
+    #
+    # # evaulate model
     return classify(test_data, model)
 
 train_and_classify(train_data, dev_data, test_data)
